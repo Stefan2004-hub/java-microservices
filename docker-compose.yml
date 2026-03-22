@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  product-db:
+    image: postgres
+    container_name: product-db
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=product_db
+    ports:
+      - "5431:5432"
+
+  order-db:
+    image: postgres
+    container_name: order-db
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=order_db
+    ports:
+      - "5432:5432"
