@@ -1,0 +1,9 @@
+POST http://localhost:8082/orders
+Content-Type: application/json
+
+{
+    "productId": 1,
+    "quantity": 2
+}
+###
+GET http://localhost:8082/orders/2/details

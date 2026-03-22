@@ -2,6 +2,7 @@ package com.example.order_service.service;
 
 import com.example.order_service.client.ProductClient;
 import com.example.order_service.client.dto.ProductResponse;
+import com.example.order_service.dto.FullOrderResponse;
 import com.example.order_service.dto.OrderRequest;
 import com.example.order_service.dto.OrderResponse;
 import com.example.order_service.exception.ResourceNotFoundException;
@@ -64,5 +65,20 @@ public class OrderService {
   private OrderResponse mapToOrderResponse(Order order) {
     return new OrderResponse(
         order.getId(), order.getProductId(), order.getQuantity(), order.getTotalPrice());
+  }
+
+  public FullOrderResponse getOrderDetails(Long orderId) {
+    // 1. Get Order from local Order DB
+    Order order =
+        orderRepository
+            .findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+    // 2. Get Product details from Product Service (via Feign)
+    ProductResponse product = fetchProduct(order.getProductId());
+
+    // 3. Combine them into the Aggregated DTO
+    return new FullOrderResponse(
+        order.getId(), order.getQuantity(), order.getTotalPrice(), product);
   }
 }

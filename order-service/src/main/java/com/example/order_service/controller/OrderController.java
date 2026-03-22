@@ -1,5 +1,6 @@
 package com.example.order_service.controller;
 
+import com.example.order_service.dto.FullOrderResponse;
 import com.example.order_service.dto.OrderRequest;
 import com.example.order_service.dto.OrderResponse;
 import com.example.order_service.service.OrderService;
@@ -7,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,5 +25,10 @@ public class OrderController {
   @PostMapping
   public ResponseEntity<OrderResponse> placeOrder(@Valid @RequestBody OrderRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(request));
+  }
+
+  @GetMapping("/{id}/details")
+  public ResponseEntity<FullOrderResponse> getOrderWithProduct(@PathVariable Long id) {
+    return ResponseEntity.ok(orderService.getOrderDetails(id));
   }
 }
