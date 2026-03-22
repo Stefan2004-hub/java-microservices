@@ -1,0 +1,11 @@
+GET http://localhost:8081/products
+###
+GET http://localhost:8081/products/2
+###
+POST http://localhost:8081/products
+Content-Type: application/json
+
+{
+  "name": "Laptop",
+  "price": 1200.0
+}
