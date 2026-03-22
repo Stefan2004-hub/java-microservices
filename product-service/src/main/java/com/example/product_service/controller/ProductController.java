@@ -3,6 +3,7 @@ package com.example.product_service.controller;
 import com.example.product_service.dto.ProductRequest;
 import com.example.product_service.dto.ProductResponse;
 import com.example.product_service.service.ProductService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class ProductController {
   private final ProductService productService;
 
   @PostMapping
-  public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest request) {
+  public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED).body(productService.saveProduct(request));
   }
 

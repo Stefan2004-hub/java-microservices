@@ -9,3 +9,34 @@ Content-Type: application/json
   "name": "Laptop",
   "price": 1200.0
 }
+###
+POST http://localhost:8081/products
+Content-Type: application/json
+
+{
+  "price": 1200.0
+}
+###
+POST http://localhost:8081/products
+Content-Type: application/json
+
+{
+  "name": "L",
+  "price": 1200.0
+}
+###
+POST http://localhost:8081/products
+Content-Type: application/json
+
+{
+  "name": "L2"
+}
+###
+POST http://localhost:8081/products
+Content-Type: application/json
+
+{
+  "name": "L2",
+  "price": -1200.0
+
+}
