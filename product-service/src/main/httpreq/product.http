@@ -1,23 +1,23 @@
-GET http://localhost:8081/products
+GET http://localhost:8080/products
 ###
-GET http://localhost:8081/products/1
+GET http://localhost:8080/products/1
 ###
-POST http://localhost:8081/products
+POST http://localhost:8080/products
 Content-Type: application/json
 
 {
-  "name": "Laptop",
-  "price": 1200.0
+  "name": "PC",
+  "price": 1000.0
 }
 ###
-POST http://localhost:8081/products
+POST http://localhost:8080/products
 Content-Type: application/json
 
 {
   "price": 1200.0
 }
 ###
-POST http://localhost:8081/products
+POST http://localhost:8080/products
 Content-Type: application/json
 
 {
@@ -25,14 +25,14 @@ Content-Type: application/json
   "price": 1200.0
 }
 ###
-POST http://localhost:8081/products
+POST http://localhost:8080/products
 Content-Type: application/json
 
 {
   "name": "L2"
 }
 ###
-POST http://localhost:8081/products
+POST http://localhost:8080/products
 Content-Type: application/json
 
 {

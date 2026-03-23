@@ -1,9 +1,9 @@
-POST http://localhost:8082/orders
+POST http://localhost:8080/orders
 Content-Type: application/json
 
 {
-    "productId": 1,
-    "quantity": 2
+    "productId": 5,
+    "quantity": 3
 }
 ###
-GET http://localhost:8082/orders/2/details
+GET http://localhost:8080/orders/2/details
