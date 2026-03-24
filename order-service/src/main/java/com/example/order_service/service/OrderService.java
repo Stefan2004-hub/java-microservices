@@ -3,12 +3,14 @@ package com.example.order_service.service;
 import com.example.order_service.client.ProductClient;
 import com.example.order_service.client.dto.ProductResponse;
 import com.example.order_service.dto.FullOrderResponse;
+import com.example.order_service.dto.OrderPlacedEvent;
 import com.example.order_service.dto.OrderRequest;
 import com.example.order_service.dto.OrderResponse;
 import com.example.order_service.exception.ResourceNotFoundException;
 import com.example.order_service.model.Order;
 import com.example.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +19,7 @@ public class OrderService {
 
   private final OrderRepository orderRepository;
   private final ProductClient productClient; // Our Feign Client
+  private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
 
   public OrderResponse createOrder(OrderRequest request) {
     // 1. Call Product Service via Feign (Synchronous Communication)
@@ -32,6 +35,11 @@ public class OrderService {
     order.setTotalPrice(total);
 
     Order savedOrder = saveOrder(request.productId(), request.quantity(), total);
+
+    kafkaTemplate.send(
+        "order-placed",
+        new OrderPlacedEvent(
+            savedOrder.getId(), savedOrder.getProductId(), savedOrder.getQuantity()));
 
     // 4. Return Response DTO
     return mapToOrderResponse(savedOrder);
