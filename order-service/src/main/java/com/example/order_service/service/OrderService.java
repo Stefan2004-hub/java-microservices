@@ -10,11 +10,13 @@ import com.example.order_service.exception.ResourceNotFoundException;
 import com.example.order_service.model.Order;
 import com.example.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
 
   private final OrderRepository orderRepository;
@@ -29,17 +31,20 @@ public class OrderService {
     // 2. Calculate Total Price
     Double total = calculateTotalPrice(product, request.quantity());
     // 3. Map to Entity and Save
-    Order order = new Order();
-    order.setProductId(request.productId());
-    order.setQuantity(request.quantity());
-    order.setTotalPrice(total);
-
     Order savedOrder = saveOrder(request.productId(), request.quantity(), total);
 
-    kafkaTemplate.send(
-        "order-placed",
-        new OrderPlacedEvent(
-            savedOrder.getId(), savedOrder.getProductId(), savedOrder.getQuantity()));
+    // 3. ASYNCHRONOUS STEP: Send to Kafka
+    try {
+      OrderPlacedEvent event =
+          new OrderPlacedEvent(
+              savedOrder.getId(), savedOrder.getProductId(), savedOrder.getQuantity());
+      log.info("Sending OrderPlacedEvent to Kafka for Order ID: {}", savedOrder.getId());
+      kafkaTemplate.send("order-placed", event);
+    } catch (Exception e) {
+      log.error("Failed to send Kafka message, but order was saved!", e);
+      // We don't throw an exception here because the order is already saved.
+      // This is the "Eventually Consistent" trade-off.
+    }
 
     // 4. Return Response DTO
     return mapToOrderResponse(savedOrder);

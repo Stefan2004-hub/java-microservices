@@ -9,8 +9,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class OrderEventListener {
 
-  @KafkaListener(topics = "order-placed", groupId = "notification-group")
+  @KafkaListener(topics = "order-placed")
   public void handleOrderPlaced(OrderPlacedEvent event) {
+    if (event == null) {
+      log.warn("Skipping order-placed message with null payload (deserialization likely failed).");
+      return;
+    }
+
     log.info(
         "📧 Notification Sent: Order #{} for Product #{} is confirmed!",
         event.orderId(),
