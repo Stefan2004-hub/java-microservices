@@ -1,10 +1,10 @@
 # Java Microservices
 
-A production-style Spring Boot microservices sample demonstrating service discovery, gateway-based routing, synchronous inter-service communication, and per-service PostgreSQL persistence.
+A production-style Spring Boot microservices sample demonstrating service discovery, gateway-based routing, synchronous inter-service communication, asynchronous event-driven messaging with Kafka, and per-service PostgreSQL persistence.
 
 ## Architecture Overview
 
-This repository contains four independent services:
+This repository contains five independent services:
 
 | Service | Port | Responsibility | Key Technologies |
 |---|---:|---|---|
@@ -12,14 +12,17 @@ This repository contains four independent services:
 | `api-gateway` | `8080` | Single entrypoint and routing | Spring Cloud Gateway (MVC), Eureka Client |
 | `product-service` | `8081` | Product catalog CRUD-style APIs | Spring Web, Spring Data JPA, PostgreSQL |
 | `order-service` | `8082` | Order placement and product-enriched order details | Spring Web, OpenFeign, Spring Data JPA, PostgreSQL |
+| `notification-service` | `8083` | Consumes order events and handles notification workflow | Spring Kafka, Eureka Client |
 
 ### Request Flow
 
 1. Clients call `api-gateway` on port `8080`.
 2. Gateway routes:
-   - `/products/**` -> `product-service`professional
+   - `/products/**` -> `product-service`
    - `/orders/**` -> `order-service`
 3. `order-service` calls `product-service` through OpenFeign using Eureka service discovery.
+4. After an order is created, `order-service` publishes `OrderPlacedEvent` to Kafka topic `order-placed`.
+5. `notification-service` consumes `order-placed` events and triggers notification handling.
 
 ## Tech Stack
 
@@ -28,6 +31,7 @@ This repository contains four independent services:
 - Spring Cloud 2025.0.x
 - Maven Wrapper (`./mvnw`) per service
 - PostgreSQL (Docker Compose for local databases)
+- Apache Kafka (event backbone for order notifications)
 - JUnit 5 + Spring Boot Test + Testcontainers
 
 ## Prerequisites
@@ -48,10 +52,11 @@ This starts:
 
 - `product-db` on host port `5431`
 - `order-db` on host port `5432`
+- Kafka on host port `9092` (with Zookeeper)
 
 ## Run Services (Recommended Order)
 
-Open four terminals from repository root and run:
+Open five terminals from repository root and run:
 
 1. Discovery server
 
@@ -74,7 +79,14 @@ cd order-service
 ./mvnw spring-boot:run
 ```
 
-4. API gateway
+4. Notification service
+
+```bash
+cd notification-service
+./mvnw spring-boot:run
+```
+
+5. API gateway
 
 ```bash
 cd api-gateway
@@ -95,6 +107,7 @@ cd api-gateway
 
 - Product service: `http://localhost:8081/products`
 - Order service: `http://localhost:8082/orders`
+- Notification service: no public business REST endpoints (Kafka consumer on topic `order-placed`)
 - Eureka dashboard: `http://localhost:8761`
 
 ## API Examples
@@ -184,6 +197,7 @@ cd discovery-server && ./mvnw -DskipTests compile
 cd ../api-gateway && ./mvnw -DskipTests compile
 cd ../product-service && ./mvnw -DskipTests compile
 cd ../order-service && ./mvnw -DskipTests compile
+cd ../notification-service && ./mvnw -DskipTests compile
 ```
 
 Run tests per service:
@@ -191,6 +205,7 @@ Run tests per service:
 ```bash
 cd product-service && ./mvnw test
 cd ../order-service && ./mvnw test
+cd ../notification-service && ./mvnw test
 cd ../api-gateway && ./mvnw test
 cd ../discovery-server && ./mvnw test
 ```
@@ -201,6 +216,7 @@ cd ../discovery-server && ./mvnw test
 - Services not visible in Eureka: start `discovery-server` first, then restart clients.
 - Database connection errors: verify Docker containers are running with `docker compose ps`.
 - Order creation fails for existing product IDs: confirm `product-service` is up and registered in Eureka.
+- Kafka event flow missing: verify broker is reachable at `localhost:9092`, `order-service` publishes to `order-placed`, and `notification-service` logs consumer activity.
 
 ## Project Metadata
 
